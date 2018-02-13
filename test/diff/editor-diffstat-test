@@ -1,0 +1,29 @@
+#!/bin/sh
+. libtest.sh
+. libgit.sh
+
+tigrc <<EOF
+set line-graphics = ascii
+set diff-view-line-number = no
+set stage-view-line-number = yes
+EOF
+
+in_work_dir create_repo_from_tgz "$base_dir/files/repo-two.tgz"
+
+steps '
+	:9
+	:edit
+'
+
+in_work_dir git submodule update
+in_work_dir mkdir -p repo-two-a/src/subdir
+
+(
+work_dir=$work_dir/repo-two-a/src/subdir
+test_tig show 8cc26dd6e80e2fa7fa98d12f4670d8983bc83678
+)
+
+assert_equals 'editor.log' <<EOF
+include/api.h
+include/api.h
+EOF
